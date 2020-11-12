@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#SBATCH -a 1-92
+#SBATCH -p dbgap
+#SBATCH -N 1
+#SBATCH -n 1
+
+#SBATCH --mem=6G
+#SBATCH -o ./slurm.out.%A.%a.txt
+#SBATCH -e ./slurm.err.%A.%a.txt
+
+
+##SBATCH -t 0-24:00:00
+
+cd /volume01/dbgap/apfennin_A022497/ncbi/dbGap-19545/sra/
+MYFILE=/volume01/dbgap/apfennin_A022497/ncbi/dbGap-19545/sra/sra_names.txt
+MYID=$SLURM_ARRAY_TASK_ID
+name=$(awk "NR==${MYID}" $MYFILE)
+
+/volume01/dbgap/apfennin_A022497/sratoolkit.2.9.6-centos_linux64/bin/fastq-dump --split-3 $name
+

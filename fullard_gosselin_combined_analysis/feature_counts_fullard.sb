@@ -1,0 +1,31 @@
+#!/bin/bash
+
+#SBATCH -a 1-12
+#SBATCH -p dbgap
+#SBATCH -N 1
+#SBATCH -n 1
+
+#SBATCH --mem=15G
+#SBATCH -o /home/eramamur/slurm.out.%A.%a.txt
+#SBATCH -e /home/eramamur/slurm.err.%A.%a.txt
+
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=eramamur@andrew.cmu.edu
+
+##SBATCH -t 0-24:00:00
+
+
+cd /projects/pfenninggroup/machineLearningForComputationalBiology/eramamur_stuff/gosselin_fullard_combined_analysis/
+
+MYFILE=/projects/pfenninggroup/machineLearningForComputationalBiology/eramamur_stuff/gosselin_fullard_combined_analysis/fullard_put_neun_plus_sra_names.txt
+MYID=$SLURM_ARRAY_TASK_ID
+name=$(awk "NR==${MYID}" $MYFILE)
+PROCESSED_DATA_PATH=/dbgap/apfennin_A022497/eramamur/atac_data_processed
+FULLARD_GOSSELIN_PEAKS_FEATURE_COUNTS=/dbgap/apfennin_A022497/eramamur/fullard_PUT_neun_plus_gosselin_exvivo_optimal_peak_feature_counts
+
+
+FEATURECOUNTSPATH=/cluster-home/eramamur/bin/subread-2.0.1-Linux-x86_64/bin/featureCounts
+ANNOTFILE=/cluster-home/eramamur/gosselin_fullard_combined_feature_counts/fullard_PUT_neun_plus_gosselin_exvivo_optimal_peak_merged.saf
+
+
+${FEATURECOUNTSPATH} -F SAF -a ${ANNOTFILE} -o ${FULLARD_GOSSELIN_PEAKS_FEATURE_COUNTS}/${name}.count.txt ${PROCESSED_DATA_PATH}/${name}.nodup.bam
