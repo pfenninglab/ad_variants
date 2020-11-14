@@ -40,6 +40,20 @@ if __name__=="__main__":
                                  "REP2_SIGNAL",
                                  "REP2_SUMMIT"]
                                 )
+    print("\t".join(["Rep_pair",
+                     "Pearson_all",
+                     "Pearson_all_Pvalue",
+                     "Spearman_all",
+                     "Spearman_all_Pvalue",
+                     "Pearson_chr4_validation",
+                     "Pearson_chr4_validation_Pvalue",
+                     "Spearman_chr4_validation",
+                     "Spearman_chr4_validation_Pvalue",
+                     "Pearson_train_chr",
+                     "Pearson_train_chr_Pvalue",
+                     "Spearman_train_chr",
+                     "Spearman_train_chr_Pvalue"]))
+
     print(os.path.basename(inFile), sep="\t", end="\t")
     p_all = pearsonr(rep1_rep2_data["REP1_SIGNAL"], rep1_rep2_data["REP2_SIGNAL"])
     s_all = spearmanr(rep1_rep2_data["REP1_SIGNAL"], rep1_rep2_data["REP2_SIGNAL"])

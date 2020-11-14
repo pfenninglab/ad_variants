@@ -1,0 +1,2 @@
+Rep_pair	Pearson_all	Pearson_all_Pvalue	Spearman_all	Spearman_all_Pvalue	Pearson_chr4_validation	Pearson_chr4_validation_Pvalue	Spearman_chr4_validation	Spearman_chr4_validation_Pvalue	Pearson_train_chr	Pearson_train_chr_Pvalue	Spearman_train_chr	Spearman_train_chr_Pvalue
+rep1-rep2.idr0.05.thresholded-peaks.txt.gz	0.8388180739889699	0.0	0.7505644875665065	0.0	0.8285668084839284	0.0	0.7177921840405915	0.0	0.8392212684917969	0.0	0.7525881521267479	0.0	
