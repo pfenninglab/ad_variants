@@ -146,7 +146,7 @@ def propagateVariantsAndGetScores(snp_info_file,
                 is_classifier,
                 curr_batch_is_overlapping
                 )
-            variants_propagated_overall += curr_batch_ref_sequences.shape[0]
+            variants_propagated_overall += len(curr_batch_ref_sequences)
             batches_propagated_overall += 1
 
         #remaining NA values need to be printed if last batch is full of non-overlapping regions
