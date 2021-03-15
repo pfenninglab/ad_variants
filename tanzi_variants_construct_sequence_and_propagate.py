@@ -79,7 +79,9 @@ def propagateVariantsAndGetScores(snp_info_file,
                                     model_path,
                                     is_classifier,
                                     batch_size,
-                                    genome_path
+                                    genome_path,
+                                    left,
+                                    right
                                 ):
 
     genome_object = py2bit.open(genome_path)
@@ -106,8 +108,8 @@ def propagateVariantsAndGetScores(snp_info_file,
 
             
             if is_overlapping:
-                ref_sequence = getSequence(ref,chrom,snp_ref_start,499,500,genome_object)
-                alt_sequence = getSequence(alt,chrom,snp_ref_start,499,500,genome_object)
+                ref_sequence = getSequence(ref,chrom,snp_ref_start,left,right,genome_object)
+                alt_sequence = getSequence(alt,chrom,snp_ref_start,left,right,genome_object)
                 ref_sequence_encoded = oneHotEncodeSequence(ref_sequence)
                 alt_sequence_encoded = oneHotEncodeSequence(alt_sequence)
                 curr_batch_ref_sequences.append(ref_sequence_encoded)
@@ -188,6 +190,18 @@ if __name__=="__main__":
                         help="path to genome reference 2bit file",
                         required=False
                         )
+    parser.add_argument("-left",
+                        "--left",
+                        type=int,
+                        default=499,
+                        required=False
+                        )
+    parser.add_argument("-right",
+                        "--right",
+                        type=int,
+                        default=500,
+                        required=False
+                        )
     parser.add_argument("-l",
                         "--log-file",
                         default="tanzi_variants_construct_sequence_and_propagate.log",
@@ -199,6 +213,8 @@ if __name__=="__main__":
 
     logging.basicConfig(filename=args.log_file, level=logging.INFO) 
     genome_path = args.genome
+    left = args.left
+    right = args.right
     model_path = args.model_path
     is_classifier = args.classifier 
     batch_size = args.batch_size
@@ -211,5 +227,7 @@ if __name__=="__main__":
                                 model_path,
                                 is_classifier,
                                 batch_size,
-                                genome_path
+                                genome_path,
+                                left,
+                                right
                                 )
