@@ -13,7 +13,7 @@ def oneHotEncodeSequence(sequence):
     return one_hot_encoded_sequence
 
 
-def getSequence(allele,chrom,position,left,right,genome):
+def getUpdatedPaddings(allele,left,right):
     alleleLength = len(allele)
     deductable = "right"
     for i in range(alleleLength-1):
@@ -23,13 +23,8 @@ def getSequence(allele,chrom,position,left,right,genome):
         elif deductable=="left":
             left-=1
             deductable="right"
-    
-    left_sequence = genome[chrom][position-left:position]
-    right_sequence = genome[chrom][position+alleleLength:position+alleleLength+right]
-    
-    sequence = left_sequence.lower()+allele.lower()+right_sequence.lower()
-    return sequence
 
+    return left,right
 
 def getOneHotEncodedSequences(bedInput, xOutput, xAlternateOutput, leftWindow, rightWindow, genomeObject, pValueCutoff, snpDataFile):
     if snpDataFile:
@@ -47,12 +42,23 @@ def getOneHotEncodedSequences(bedInput, xOutput, xAlternateOutput, leftWindow, r
             a2 = curInterval[5]
             gwas_p = float(curInterval[6])
             gwas_z = float(curInterval[7])
-            if gwas_p < pValueCutoff:
+            if gwas_p <= pValueCutoff:
                 if snpDataFile:
                     outf.write("\t".join(curInterval))
                     outf.write("\n")
-                referenceSequence  = getSequence(a1,chrom,start,leftWindow,rightWindow,genomeObject)
-                alternateSequence = getSequence(a2,chrom,start,leftWindow,rightWindow,genomeObject)
+
+                referenceLeftWindow, referenceRightWindow = getUpdatedPaddings(a1, leftWindow, rightWindow)
+                alternateLeftWindow, alternateRightWindow = getUpdatedPaddings(a2, leftWindow, rightWindow)
+
+                referenceLeftSequence = genome[chrom][position-referenceLeftWindow:position]
+                referenceRightSequence = genome[chrom][position+len(a1):position+len(a1)+referenceRightWindow]
+                referenceSequence = referenceLeftSequence.lower() + a1.lower() + referenceRightSequence.lower()
+                
+                alternateLeftSequence = genome[chrom][position-alternateLeftWindow:position]
+                alternateRightSequence = genome[chrom][position+len(a1):position+len(a1)+alternateRightWindow]
+                alternateSequence = alternateLeftSequence.lower() + a2.lower() + alternateRightSequence.lower()
+
+
                 assert(len(referenceSequence)==leftWindow+rightWindow+1)
                 assert(len(alternateSequence)==leftWindow+rightWindow+1)
                 encodedReferenceSequence = oneHotEncodeSequence(referenceSequence)
