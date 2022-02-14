@@ -4,7 +4,7 @@ import argparse
 import py2bit
 
 
-def getSnpCenteredSequence(allele,chrom,position,left,right,genome):
+def getUpdatedPaddings(allele,left,right):
     alleleLength = len(allele)
     
     deductable = "right"
@@ -16,13 +16,7 @@ def getSnpCenteredSequence(allele,chrom,position,left,right,genome):
             left-=1
             deductable="right"
     
-    left_sequence = genome.sequence(chrom, position-left, position)
-    right_sequence = genome.sequence(chrom,
-                                     position+alleleLength,
-                                     position+alleleLength+right)
-    
-    sequence = left_sequence.lower()+allele.lower()+right_sequence.lower()
-    return sequence
+    return left,right
 
 
 def getSequencesAndPrint(dataFile, genome_object, mpraSeqLength, exptName, summitColumnPresent):
@@ -92,25 +86,41 @@ def getSequencesAndPrint(dataFile, genome_object, mpraSeqLength, exptName, summi
         summitLocation = int(row["PEAKSTART"]+ row["SUMMIT"])
         mpraSeqStart = summitLocation - mpraSeqLength//2
         mpraSeqEnd = mpraSeqStart + mpraSeqLength
-        summitNucleotide = genome_object.sequence(chrom,summitLocation,summitLocation+1)
-        leftSequence = genome_object.sequence(chrom,mpraSeqStart,summitLocation)
-        rightSequence = genome_object.sequence(chrom,summitLocation+1,mpraSeqEnd)
         snpStart = row["SNPSTART"]
         snpEnd = row["SNPEND"]
         if mpraSeqStart <= snpStart and snpEnd <= mpraSeqEnd and (snpStart+len(alt)) <= mpraSeqEnd:
             #making sure both the ref and alt alleles are within 227bp of summit
-            snpCenteredRefSequence = getSnpCenteredSequence(ref,
-                                                            chrom,
-                                                            snpStart,
-                                                            mpraSeqLength//2,
-                                                            mpraSeqLength//2,
-                                                            genome_object)
-            snpCenteredAltSequence = getSnpCenteredSequence(alt,
-                                                            chrom,
-                                                            snpStart,
-                                                            mpraSeqLength//2,
-                                                            mpraSeqLength//2,
-                                                            genome_object)
+            (snpCenteredRefSequenceLeftWindow,
+            snpCenteredRefSequenceRightWindow) = getUpdatedPaddings(ref,
+                                                                    mpraSeqLength//2,
+                                                                    mpraSeqLength//2
+                                                                    )
+            (snpCenteredAltSequenceLeftWindow,
+            snpCenteredAltSequenceRightWindow) = getUpdatedPaddings(alt,
+                                                                    mpraSeqLength//2,
+                                                                    mpraSeqLength//2
+                                                                    )
+            snpCenteredRefSequenceLeft = genome_object.sequence(chrom,
+                                                                snpStart-snpCenteredRefSequenceLeftWindow,
+                                                                snpStart)
+            snpCenteredRefSequenceRight = genome_object.sequence(chrom,
+                                                                 snpStart+len(ref),
+                                                                 snpStart+len(ref)+snpCenteredRefSequenceRightWindow
+                                                                 )
+            snpCenteredRefSequence = snpCenteredRefSequenceLeft.lower()+ref.lower()+snpCenteredRefSequenceRight.lower()
+
+
+
+            snpCenteredAltSequenceLeft = genome_object.sequence(chrom,
+                                                                snpStart-snpCenteredAltSequenceLeftWindow,
+                                                                snpStart
+                                                                )
+            snpCenteredAltSequenceRight = genome_object.sequence(chrom,
+                                                                 snpStart+len(ref),
+                                                                 snpStart+len(ref)+snpCenteredAltSequenceRightWindow
+                                                                 )
+            snpCenteredAltSequence = snpCenteredAltSequenceLeft.lower()+alt.lower()+snpCenteredAltSequenceRight.lower()
+
             if snpStart <= summitLocation < snpEnd:
                 # case when snp overlaps the summit
                 summitCenteredRefSequence = snpCenteredRefSequence
@@ -149,7 +159,7 @@ def getSequencesAndPrint(dataFile, genome_object, mpraSeqLength, exptName, summi
                 summitCenteredAltSequence = genome_object.sequence(chrom,mpraSeqStart,snpStart).lower()
                 summitCenteredAltSequence = summitCenteredAltSequence + alt.lower()
                 curAltSeqLen = len(summitCenteredAltSequence)
-                if not curAltSeqLen == mpraSeqLength:
+                if not curAltSeqLen >= mpraSeqLength:
                     #edge case when the SNP is at the edge of the sequence
                     summitCenteredAltSequence = (summitCenteredAltSequence
                                                  +genome_object.sequence(chrom,
