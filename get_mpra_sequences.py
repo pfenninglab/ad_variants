@@ -121,11 +121,7 @@ def getSequencesAndPrint(dataFile, genome_object, mpraSeqLength, exptName, summi
                                                                  )
             snpCenteredAltSequence = snpCenteredAltSequenceLeft.lower()+alt.lower()+snpCenteredAltSequenceRight.lower()
 
-            if snpStart <= summitLocation < snpEnd:
-                # case when snp overlaps the summit
-                summitCenteredRefSequence = snpCenteredRefSequence
-                summitCenteredAltSequence = snpCenteredAltSequence
-            elif snpStart < summitLocation:
+            if snpStart < summitLocation:
                 # case when snp is to the left of summit
                 summitCenteredRefSequence = genome_object.sequence(chrom, snpEnd, mpraSeqEnd).lower()
                 summitCenteredRefSequence = ref.lower() + summitCenteredRefSequence
@@ -144,7 +140,7 @@ def getSequencesAndPrint(dataFile, genome_object, mpraSeqLength, exptName, summi
                     summitCenteredAltSequence = genome_object.sequence(chrom,
                                                                        snpStart+curAltSeqLen-mpraSeqLength,
                                                                        snpStart).lower() + summitCenteredAltSequence
-            elif snpStart > summitLocation:
+            elif snpStart >= summitLocation:
                 # case when snp is to the right of summit
                 summitCenteredRefSequence = genome_object.sequence(chrom,mpraSeqStart,snpStart).lower()
                 summitCenteredRefSequence = summitCenteredRefSequence + ref.lower()
