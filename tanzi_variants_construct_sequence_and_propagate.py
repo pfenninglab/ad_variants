@@ -20,7 +20,7 @@ def oneHotEncodeSequence(sequence):
             one_hot_encoded_sequence[i][index] = 1
     return one_hot_encoded_sequence
 
-def getSequence(allele,chrom,position,left,right,genome):
+def getUpdatedPaddings(allele,left,right):
     alleleLength = len(allele)
     deductable = "right"
     for i in range(alleleLength-1):
@@ -31,11 +31,7 @@ def getSequence(allele,chrom,position,left,right,genome):
             left-=1
             deductable="right"
     
-    left_sequence = genome.sequence(chrom, position-left, position)
-    right_sequence = genome.sequence(chrom, position+alleleLength, position+alleleLength+right)
-    
-    sequence = left_sequence.lower()+allele.lower()+right_sequence.lower()
-    return sequence
+    return left, right
 
 
 def onBatchEnd(model,
@@ -108,8 +104,25 @@ def propagateVariantsAndGetScores(snp_info_file,
 
             
             if is_overlapping:
-                ref_sequence = getSequence(ref,chrom,snp_ref_start,left,right,genome_object)
-                alt_sequence = getSequence(alt,chrom,snp_ref_start,left,right,genome_object)
+                ref_sequence_left_window, ref_sequence_right_window = getUpdatedPaddings(ref,left,right)
+                alt_sequence_left_window, alt_sequence_right_window = getUpdatedPaddings(alt,left,right)
+                ref_left_sequence = genome_object.sequence(chrom,
+                                                           snp_ref_start-ref_sequence_left_window,
+                                                           snp_ref_start)
+                ref_right_sequence = genome_object.sequence(chrom,
+                                                            snp_ref_start+len(ref),
+                                                            snp_ref_start+len(ref)+ref_sequence_right_window)
+                ref_sequence = ref_left_sequence + ref + ref_right_sequence
+
+                alt_left_sequence = genome_object.sequence(chrom,
+                                                           snp_ref_start-alt_sequence_left_window,
+                                                           snp_ref_start)
+                alt_right_sequence = genome_object.sequence(chrom,
+                                                            snp_ref_start+len(ref),
+                                                            snp_ref_start+len(ref)+alt_sequence_right_window
+                                                            )
+                alt_sequence = alt_left_sequence + alt + alt_right_sequence
+
                 ref_sequence_encoded = oneHotEncodeSequence(ref_sequence)
                 alt_sequence_encoded = oneHotEncodeSequence(alt_sequence)
                 curr_batch_ref_sequences.append(ref_sequence_encoded)
