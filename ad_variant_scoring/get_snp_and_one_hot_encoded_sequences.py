@@ -26,7 +26,7 @@ def getUpdatedPaddings(allele,left,right):
 
     return left,right
 
-def getOneHotEncodedSequences(bedInput, xOutput, xAlternateOutput, leftWindow, rightWindow, genomeObject, pValueCutoff, snpDataFile):
+def getOneHotEncodedSequences(bedInput, xOutput, xAlternateOutput, leftWindow, rightWindow, genome, pValueCutoff, snpDataFile):
     if snpDataFile:
         outf = open(snpDataFile, 'w')
     finalReferenceSequences = []
@@ -42,6 +42,8 @@ def getOneHotEncodedSequences(bedInput, xOutput, xAlternateOutput, leftWindow, r
             a2 = curInterval[5]
             gwas_p = float(curInterval[6])
             gwas_z = float(curInterval[7])
+            position = start
+
             if gwas_p <= pValueCutoff:
                 if snpDataFile:
                     outf.write("\t".join(curInterval))
