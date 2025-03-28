@@ -7,7 +7,7 @@ import pandas as pd
 from scipy.special import logit
 
 import py2bit
-from keras.models import load_model
+#from keras.models import load_model
 
 
 def oneHotEncodeSequence(sequence):
